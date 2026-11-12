@@ -375,6 +375,19 @@
     backdrop-filter: blur(4px);
   }
   .ghost-btn:active{ transform: scale(0.97); }
+  .text-btn{
+    margin-top: 12px;
+    background: none; border: none;
+    color: var(--ink);
+    opacity: 0.85;
+    font-family:'Space Grotesk', sans-serif; font-weight:500; font-size: 13px;
+    text-decoration: underline;
+    text-underline-offset: 3px;
+    text-shadow: 0 1px 6px rgba(0,0,0,0.8);
+    padding: 6px 10px;
+    cursor: pointer;
+  }
+  .text-btn[hidden]{ display:none; }
   .badge{
     background: var(--coral);
     color: #fff;
@@ -691,6 +704,7 @@
       <div class="welcome-sub">to 2DaDa</div>
       <button class="start-btn" id="startBtn">Start</button>
       <button class="ghost-btn" id="rewardsBtn">Rewards <span class="badge" id="rewardsBadge" hidden></span></button>
+      <button class="text-btn" id="newGameBtn" hidden>Start over from chapter 1</button>
       <div class="welcome-tip">Tap 1, then da da before every next number</div>
     </div>
     <div class="welcome-caption" id="welcomeCaption">Mosi-oa-Tunya · Victoria Falls</div>
@@ -1330,6 +1344,7 @@
       }
       bestChapter = Math.max(bestChapter, chapter);
       progress.best = Math.max(progress.best, bestChapter);
+      progress.checkpoint = chapter;      // reached a new chapter: this is now the restart point
       saveProgress();
       setScene(chapter);
       const name = SCENES[(chapter - 1) % SCENES.length].short;
@@ -1354,6 +1369,7 @@
     el.failReason.textContent = reason;
     el.failChapter.textContent = chapter;
     el.failRounds.textContent = (round - 1);
+    el.retryBtn.textContent = chapter > 1 ? 'Retry chapter ' + chapter : 'Retry';
     setTimeout(() => el.failOverlay.classList.add('show'), 260);
   }
 
@@ -1363,6 +1379,7 @@
     chapter = CHAPTER_COUNT;
     bestChapter = CHAPTER_COUNT;
     progress.best = CHAPTER_COUNT;
+    progress.checkpoint = 1;              // whole game cleared: next run starts fresh
     saveProgress();
     updateHud();
     sfxRound();
@@ -1372,17 +1389,17 @@
 
   el.retryBtn.addEventListener('click', () => {
     el.failOverlay.classList.remove('show');
-    resetGame(true);
+    resetGame(true, chapter);             // same chapter, back to round 1
   });
 
   el.playAgainBtn.addEventListener('click', () => {
     el.winOverlay.classList.remove('show');
-    resetGame(true);
+    resetGame(true, 1);
   });
 
   // ---------- reset / init ----------
-  function resetGame(keepBest){
-    chapter = START_CHAPTER;
+  function resetGame(keepBest, fromChapter){
+    chapter = fromChapter || START_CHAPTER;
     round = 1;
     if (!keepBest) bestChapter = Math.max(START_CHAPTER, progress.best);
     applySkin();
@@ -1413,7 +1430,8 @@
   // ---------- progress (saved on the device) ----------
   const STORE_KEY = '2dada.progress.v1';
   function loadProgress(){
-    const base = { cleared: 0, rounds: 0, best: 1, theme: 'falls', skin: 'classic', unlocked: [], seen: [] };
+    // checkpoint = the chapter the player has reached; failing restarts that chapter, not chapter 1
+    const base = { cleared: 0, rounds: 0, best: 1, checkpoint: 1, theme: 'falls', skin: 'classic', unlocked: [], seen: [] };
     try {
       const raw = localStorage.getItem(STORE_KEY);
       if (raw) return Object.assign(base, JSON.parse(raw));
@@ -1561,8 +1579,21 @@
     document.getElementById('welcomeCaption').textContent = SCENES[t.scene].caption;
   }
 
+  // Start becomes "Continue" once the player has reached a later chapter.
+  const startBtn = document.getElementById('startBtn');
+  const newGameBtn = document.getElementById('newGameBtn');
+  function checkpointChapter(){
+    if (START_CHAPTER !== 1) return START_CHAPTER;   // ?chapter= testing helper wins
+    return Math.min(CHAPTER_COUNT, Math.max(1, progress.checkpoint || 1));
+  }
+  function updateStartLabel(){
+    const cp = checkpointChapter();
+    startBtn.textContent = cp > 1 ? 'Continue · Chapter ' + cp : 'Start';
+    newGameBtn.hidden = cp <= 1;
+  }
+
   let starting = false;
-  document.getElementById('startBtn').addEventListener('click', () => {
+  function startGame(fromChapter){
     if (starting) return;
     starting = true;
     ensureAudio();          // a tap is needed before sounds can play
@@ -1571,8 +1602,14 @@
     welcome.classList.add('leaving');
     setTimeout(() => {
       welcome.classList.add('gone');
-      resetGame(false);     // start only once the welcome page has faded, so no time is lost
+      resetGame(false, fromChapter);   // start only once the welcome page has faded, so no time is lost
     }, 450);
+  }
+  startBtn.addEventListener('click', () => startGame(checkpointChapter()));
+  newGameBtn.addEventListener('click', () => {
+    progress.checkpoint = 1;
+    saveProgress();
+    startGame(1);
   });
 
   function goHome(){
@@ -1587,12 +1624,36 @@
     welcome.classList.remove('leaving');
     starting = false;
     updateRewardsBadge();
+    updateStartLabel();
   }
   document.querySelectorAll('[data-home]').forEach(b => b.addEventListener('click', goHome));
+
+  // ---------- phone back button ----------
+  // Back goes to the previous page instead of closing the app:
+  //   Rewards -> welcome page, game / end screens -> welcome page,
+  //   welcome page -> close the app (the normal Android behaviour on the first page).
+  const AppPlugin = window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.App;
+  function handleBack(){
+    if (rewardsEl.classList.contains('open')){ closeRewards(); return; }
+    if (welcome.classList.contains('leaving') && !welcome.classList.contains('gone')) return; // mid-fade
+    if (!welcome.classList.contains('gone')){
+      if (AppPlugin) AppPlugin.exitApp();
+      return;
+    }
+    goHome();
+  }
+  if (AppPlugin) AppPlugin.addListener('backButton', handleBack);
+  // Escape does the same in a desktop browser (handy for testing)
+  document.addEventListener('keydown', (e) => { if (e.key === 'Escape') handleBack(); });
+
+  // Pause the clock while the app is in the background, so switching apps
+  // or locking the phone doesn't burn the timer.
+  document.addEventListener('visibilitychange', () => { lastFrameTs = null; });
 
   checkUnlocks(false);
   renderWelcomeScene();
   applySkin();
+  updateStartLabel();
 })();
 </script>
 
