@@ -1,0 +1,13 @@
+{
+  "appId": "com.chilembo.dada",
+  "appName": "2DaDa",
+  "webDir": "www",
+  "backgroundColor": "#14111f",
+  "plugins": {
+    "StatusBar": {
+      "overlaysWebView": false,
+      "style": "DARK",
+      "backgroundColor": "#14111f"
+    }
+  }
+}

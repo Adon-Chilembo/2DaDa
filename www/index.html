@@ -1,0 +1,1012 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<title>2DaDa</title>
+<style>
+  /* fonts are bundled in www/fonts so the app works offline */
+  @font-face{ font-family:'Space Grotesk'; font-weight:500; font-display:swap; src:url('fonts/space-grotesk-latin-500-normal.woff2') format('woff2'); }
+  @font-face{ font-family:'Space Grotesk'; font-weight:700; font-display:swap; src:url('fonts/space-grotesk-latin-700-normal.woff2') format('woff2'); }
+  @font-face{ font-family:'JetBrains Mono'; font-weight:500; font-display:swap; src:url('fonts/jetbrains-mono-latin-500-normal.woff2') format('woff2'); }
+  @font-face{ font-family:'JetBrains Mono'; font-weight:700; font-display:swap; src:url('fonts/jetbrains-mono-latin-700-normal.woff2') format('woff2'); }
+
+  :root{
+    --bg: #14111f;
+    --panel: #1e1a2e;
+    --panel-line: #2f2947;
+    --gold: #f2c744;
+    --mint: #4ade9c;
+    --coral: #ff5470;
+    --ink: #f5f0ff;
+    --muted: #8b84a8;
+  }
+
+  *{ box-sizing:border-box; -webkit-tap-highlight-color: transparent; }
+
+  html,body{
+    margin:0; padding:0; height:100%;
+    background: var(--bg);
+    color: var(--ink);
+    font-family: 'Space Grotesk', sans-serif;
+    overflow:hidden;
+    touch-action: manipulation;
+    -webkit-user-select: none;
+    user-select: none;
+    overscroll-behavior: none;
+  }
+
+  #app{
+    max-width: 430px;
+    margin: 0 auto;
+    height: 100vh;
+    height: 100dvh;
+    display:flex;
+    flex-direction:column;
+    position:relative;
+    background:
+      radial-gradient(circle at 50% 18%, rgba(242,199,68,0.06), transparent 55%),
+      var(--bg);
+  }
+
+  /* ---------- topbar ---------- */
+  .topbar{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    padding: calc(18px + env(safe-area-inset-top)) 20px 14px;
+    border-bottom: 1px solid var(--panel-line);
+    flex-shrink:0;
+  }
+  .stat{
+    display:flex;
+    flex-direction:column;
+    gap: 2px;
+  }
+  .stat .label{
+    font-size: 11px;
+    color: var(--muted);
+    letter-spacing: 0.02em;
+  }
+  .stat .value{
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 18px;
+    font-weight: 700;
+  }
+  .stat.mid .value{ color: var(--gold); }
+  .stat.right{ text-align:right; align-items:flex-end; }
+
+  /* ---------- playfield ---------- */
+  .playfield{
+    position: relative;
+    flex: 1;
+    overflow: hidden;
+  }
+
+  /* ---------- chapter scene (Zambia artwork behind the playfield) ---------- */
+  .scene{
+    position:absolute; inset:0;
+    pointer-events:none;
+    opacity: 0.62;
+    transition: opacity 0.35s ease;
+  }
+  .scene.fading{ opacity: 0; }
+  .scene svg{ width:100%; height:100%; display:block; }
+  .scene-shade{
+    position:absolute; inset:0;
+    pointer-events:none;
+    background: linear-gradient(to bottom, rgba(20,17,31,0.55), rgba(20,17,31,0.15) 30%, rgba(20,17,31,0.15) 75%, rgba(20,17,31,0.6));
+  }
+  .scene-caption{
+    position:absolute;
+    left:0; right:0; bottom: 10px;
+    text-align:center;
+    font-size: 11px;
+    letter-spacing: 0.04em;
+    color: rgba(245,240,255,0.75);
+    text-shadow: 0 1px 3px rgba(0,0,0,0.8);
+    pointer-events:none;
+    transition: opacity 0.35s ease;
+  }
+  .scene-caption.fading{ opacity:0; }
+
+  .prompt{
+    position:absolute;
+    top: 22px; left:0; right:0;
+    text-align:center;
+    font-size: 14px;
+    color: var(--ink);
+    opacity: 0.85;
+    text-shadow: 0 1px 4px rgba(0,0,0,0.9);
+    letter-spacing: 0.01em;
+    transition: opacity 0.2s ease;
+    pointer-events:none;
+  }
+
+  /* ---------- middle button ---------- */
+  .middle-wrap{
+    position:absolute;
+    top:50%; left:50%;
+    transform: translate(-50%,-50%);
+    width: 132px; height: 132px;
+  }
+  .timer-row{
+    padding: 0 20px 14px;
+    flex-shrink:0;
+  }
+  .timer-track{
+    height: 8px;
+    border-radius: 999px;
+    background: var(--panel-line);
+    overflow:hidden;
+  }
+  .timer-fill{
+    height:100%;
+    width:100%;
+    border-radius: 999px;
+    background: var(--gold);
+  }
+
+  #middleBtn{
+    position:absolute; inset: 10px;
+    border-radius: 50%;
+    border: none;
+    background: linear-gradient(160deg, #2a2444, #1c1830);
+    color: var(--ink);
+    font-family: 'Space Grotesk', sans-serif;
+    font-weight: 700;
+    font-size: 17px;
+    cursor: pointer;
+    display:flex; align-items:center; justify-content:center;
+    box-shadow: 0 0 0 1px var(--panel-line), 0 8px 24px rgba(0,0,0,0.4);
+    transition: transform 0.08s ease, box-shadow 0.2s ease;
+  }
+  #middleBtn:active{ transform: scale(0.94); }
+  #middleBtn.pulse{ animation: pulseOut 0.28s ease; }
+  @keyframes pulseOut{
+    0%{ box-shadow: 0 0 0 1px var(--panel-line), 0 8px 24px rgba(0,0,0,0.4); }
+    40%{ box-shadow: 0 0 0 14px rgba(242,199,68,0.12), 0 8px 24px rgba(0,0,0,0.4); }
+    100%{ box-shadow: 0 0 0 1px var(--panel-line), 0 8px 24px rgba(0,0,0,0.4); }
+  }
+
+  /* ---------- number buttons ---------- */
+  .num-btn{
+    position:absolute;
+    width: 52px; height: 52px;
+    border-radius: 50%;
+    border: none;
+    background: var(--panel);
+    color: var(--ink);
+    font-family: 'JetBrains Mono', monospace;
+    font-weight: 700;
+    font-size: 18px;
+    box-shadow: 0 0 0 1px var(--panel-line), 0 4px 14px rgba(0,0,0,0.35);
+    display:flex; align-items:center; justify-content:center;
+    cursor:pointer;
+    transform: translate(-50%,-50%) scale(0.6);
+    opacity: 0;
+    animation: numIn 0.22s ease forwards;
+  }
+  @keyframes numIn{
+    to{ opacity:1; transform: translate(-50%,-50%) scale(1); }
+  }
+  .num-btn.correct{
+    animation: numOut 0.28s ease forwards;
+    pointer-events:none;
+  }
+  @keyframes numOut{
+    0%{ transform: translate(-50%,-50%) scale(1); }
+    40%{ background: var(--mint); box-shadow: 0 0 0 2px var(--mint), 0 0 22px rgba(74,222,156,0.5); transform: translate(-50%,-50%) scale(1.18); }
+    100%{ opacity:0; transform: translate(-50%,-50%) scale(0.3); }
+  }
+  .num-btn.wrong{
+    animation: numWrong 0.35s ease;
+  }
+  @keyframes numWrong{
+    0%,100%{ transform: translate(-50%,-50%) scale(1); }
+    25%{ transform: translate(-56%,-50%) scale(1); background: var(--coral); }
+    75%{ transform: translate(-44%,-50%) scale(1); background: var(--coral); }
+  }
+
+  .shake{ animation: shakeField 0.3s ease; }
+  @keyframes shakeField{
+    0%,100%{ transform: translateX(0); }
+    20%{ transform: translateX(-6px); }
+    40%{ transform: translateX(5px); }
+    60%{ transform: translateX(-4px); }
+    80%{ transform: translateX(3px); }
+  }
+
+  /* ---------- round toast ---------- */
+  .toast{
+    position:absolute;
+    top: 40%; left:50%;
+    transform: translate(-50%,-50%) scale(0.85);
+    background: var(--panel);
+    border: 1px solid var(--panel-line);
+    padding: 14px 26px;
+    border-radius: 14px;
+    font-family: 'JetBrains Mono', monospace;
+    font-weight: 700;
+    font-size: 15px;
+    color: var(--mint);
+    white-space: nowrap;
+    opacity: 0;
+    pointer-events:none;
+    transition: opacity 0.18s ease, transform 0.18s ease;
+  }
+  .toast.show{ opacity:1; transform: translate(-50%,-50%) scale(1); }
+  .toast.chapter{ color: var(--gold); }
+
+  /* ---------- fail overlay ---------- */
+  .fail-overlay{
+    position:absolute; inset:0;
+    background: rgba(20,17,31,0.94);
+    display:flex; flex-direction:column; align-items:center; justify-content:center;
+    gap: 10px;
+    opacity:0; pointer-events:none;
+    transition: opacity 0.25s ease;
+    text-align:center;
+    padding: 0 32px;
+  }
+  .fail-overlay.show{ opacity:1; pointer-events:auto; }
+  .fail-word{
+    font-size: 30px; font-weight:700; color: var(--coral);
+    margin-bottom: 4px;
+  }
+  .fail-reason{ color: var(--muted); font-size: 14px; margin-bottom: 18px; }
+  .fail-stats{
+    display:flex; gap: 28px; margin-bottom: 26px;
+  }
+  .fail-stats .stat .value{ color: var(--ink); }
+  .retry-btn{
+    background: var(--gold);
+    color: #221b0a;
+    border:none;
+    font-family:'Space Grotesk', sans-serif;
+    font-weight:700;
+    font-size: 16px;
+    padding: 14px 40px;
+    border-radius: 999px;
+    cursor:pointer;
+  }
+  .retry-btn:active{ transform: scale(0.97); }
+
+  .win-word{ color: var(--mint); }
+  .win-btn{ background: var(--mint); color: #0e2a1d; }
+
+  .footer-hint{
+    padding: 12px 20px calc(18px + env(safe-area-inset-bottom));
+    text-align:center;
+    font-size: 12px;
+    color: var(--muted);
+    flex-shrink:0;
+  }
+</style>
+</head>
+<body>
+
+<div id="app">
+
+  <div class="topbar">
+    <div class="stat">
+      <span class="label">Chapter</span>
+      <span class="value" id="chapterVal">1</span>
+    </div>
+    <div class="stat mid">
+      <span class="label">Round</span>
+      <span class="value" id="roundVal">1 / 2</span>
+    </div>
+    <div class="stat right">
+      <span class="label">Best chapter</span>
+      <span class="value" id="bestVal">1</span>
+    </div>
+  </div>
+
+  <div class="timer-row">
+    <div class="timer-track">
+      <div class="timer-fill" id="timerFill"></div>
+    </div>
+  </div>
+
+  <div class="playfield" id="playfield">
+    <div class="scene" id="scene"></div>
+    <div class="scene-shade"></div>
+    <div class="scene-caption" id="sceneCaption"></div>
+
+    <div class="prompt" id="prompt">Tap da da first — don't touch the numbers yet</div>
+
+    <div class="middle-wrap">
+      <button id="middleBtn">da</button>
+    </div>
+
+    <div class="toast" id="toast"></div>
+  </div>
+
+  <div class="footer-hint">Numbers appear right away — tapping one before finishing da da is an instant fail</div>
+
+  <div class="fail-overlay" id="failOverlay">
+    <div class="fail-word">Missed it</div>
+    <div class="fail-reason" id="failReason">Timed out</div>
+    <div class="fail-stats">
+      <div class="stat">
+        <span class="label">Chapter</span>
+        <span class="value" id="failChapter">1</span>
+      </div>
+      <div class="stat">
+        <span class="label">Rounds cleared</span>
+        <span class="value" id="failRounds">0</span>
+      </div>
+    </div>
+    <button class="retry-btn" id="retryBtn">Retry</button>
+  </div>
+
+  <div class="fail-overlay win-overlay" id="winOverlay">
+    <div class="fail-word win-word">Cleared it</div>
+    <div class="fail-reason">All 5 chapters done</div>
+    <div class="fail-stats">
+      <div class="stat">
+        <span class="label">Chapters cleared</span>
+        <span class="value" id="winChapters">5</span>
+      </div>
+    </div>
+    <button class="retry-btn win-btn" id="playAgainBtn">Play again</button>
+  </div>
+
+</div>
+
+<script>
+(function(){
+  "use strict";
+
+  // ---------- config ----------
+  const CHAPTER_COUNT = 5;
+  const ROUNDS_PER_CHAPTER = 2;
+  const TIME_FLOOR = 1.0;
+
+  // Testing helper: open the page with ?chapter=3 to start (and retry) from chapter 3.
+  const START_CHAPTER = (() => {
+    const n = parseInt(new URLSearchParams(location.search).get('chapter'), 10);
+    return (n >= 1 && n <= CHAPTER_COUNT) ? n : 1;
+  })();
+
+  // Round 1 of chapter 1 starts at 3.0s / 10 numbers. Every round after that:
+  // timer drops by 1s (floored at TIME_FLOOR) and number count rises by 5,
+  // chaining straight through from one chapter into the next.
+  function buildChapters(){
+    const chapters = [];
+    let time = 3.0;
+    let count = 10;
+    for (let c = 1; c <= CHAPTER_COUNT; c++){
+      const r1 = { timeLimit: time, numberCount: count };
+      const r2 = { timeLimit: Math.max(TIME_FLOOR, time - 1.0), numberCount: count + 5 };
+      chapters.push([r1, r2]);
+      time = r2.timeLimit;
+      count = r2.numberCount;
+    }
+    return chapters;
+  }
+  const CHAPTERS = buildChapters();
+
+  function roundConfig(chapterIndex, roundIndex){ // both 1-based
+    return CHAPTERS[chapterIndex - 1][roundIndex - 1];
+  }
+
+  // ---------- chapter scenes: Zambia ----------
+  // Each chapter gets its own hand-drawn SVG, shown behind the playfield.
+  // viewBox is portrait (400x700) and sliced to fill any screen.
+
+  // Eagle in flight, wings raised (used on the flag and for the fish eagle)
+  const EAGLE_PATH = "M0,-18 C4,-18 6,-14 5,-10 L14,-14 C26,-34 46,-44 66,-46 C58,-38 54,-30 52,-22 C44,-20 36,-14 30,-6 C22,0 14,4 8,8 L12,26 L4,20 L0,30 L-4,20 L-12,26 L-8,8 C-14,4 -22,0 -30,-6 C-36,-14 -44,-20 -52,-22 C-54,-30 -58,-38 -66,-46 C-46,-44 -26,-34 -14,-14 L-5,-10 C-6,-14 -4,-18 0,-18 Z";
+
+  function svgWrap(inner){
+    return '<svg viewBox="0 0 400 700" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg">' + inner + '</svg>';
+  }
+
+  function sceneFlag(){
+    return svgWrap(`
+      <defs>
+        <linearGradient id="flagWave" x1="0" y1="0" x2="1" y2="0.35">
+          <stop offset="0" stop-color="#fff" stop-opacity="0"/>
+          <stop offset="0.2" stop-color="#fff" stop-opacity="0.10"/>
+          <stop offset="0.4" stop-color="#000" stop-opacity="0.12"/>
+          <stop offset="0.6" stop-color="#fff" stop-opacity="0.10"/>
+          <stop offset="0.8" stop-color="#000" stop-opacity="0.12"/>
+          <stop offset="1" stop-color="#fff" stop-opacity="0.06"/>
+        </linearGradient>
+      </defs>
+      <rect width="400" height="700" fill="#198a00"/>
+      <rect x="250" y="330" width="50" height="370" fill="#de2010"/>
+      <rect x="300" y="330" width="50" height="370" fill="#000000"/>
+      <rect x="350" y="330" width="50" height="370" fill="#ef7d00"/>
+      <g transform="translate(325,225) scale(1.1)">
+        <path d="${EAGLE_PATH}" fill="#ef7d00"/>
+      </g>
+      <rect width="400" height="700" fill="url(#flagWave)"/>
+    `);
+  }
+
+  function sceneVictoriaFalls(){
+    let streaks = '';
+    for (let i = 0; i < 26; i++){
+      const x = 6 + i * 15.4 + (i % 3) * 3;
+      const w = 1.5 + (i * 7 % 4);
+      const op = (0.16 + (i * 13 % 5) * 0.07).toFixed(2);
+      streaks += `<rect x="${x}" y="237" width="${w}" height="300" fill="#ffffff" opacity="${op}"/>`;
+    }
+    const bow = ['#ff4d4d','#ff9f40','#ffe066','#6fdc8c','#5aa9ff','#a77bff'];
+    let rainbow = '';
+    bow.forEach((c, i) => {
+      const r = 150 - i * 8;
+      rainbow += `<path d="M${200 - r},610 A${r},${r} 0 0 1 ${200 + r},610" fill="none" stroke="${c}" stroke-width="8" opacity="0.32"/>`;
+    });
+    return svgWrap(`
+      <defs>
+        <linearGradient id="vfSky" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0" stop-color="#1d2b5a"/>
+          <stop offset="1" stop-color="#5b86b8"/>
+        </linearGradient>
+        <linearGradient id="vfWater" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0" stop-color="#d9efff"/>
+          <stop offset="1" stop-color="#7fb2d9"/>
+        </linearGradient>
+      </defs>
+      <rect width="400" height="240" fill="url(#vfSky)"/>
+      <ellipse cx="200" cy="130" rx="170" ry="95" fill="#ffffff" opacity="0.12"/>
+      <ellipse cx="140" cy="80" rx="90" ry="60" fill="#ffffff" opacity="0.10"/>
+      <ellipse cx="280" cy="100" rx="80" ry="55" fill="#ffffff" opacity="0.08"/>
+      <path d="M0,232 L0,200 Q15,182 35,196 Q50,176 72,192 Q90,172 112,190 Q130,178 150,194 Q172,170 196,190 Q215,178 236,194 Q256,172 280,190 Q300,176 322,194 Q342,174 364,192 Q382,182 400,196 L400,232 Z" fill="#1f4d2b"/>
+      <rect x="0" y="226" width="400" height="12" fill="#3b2f2a"/>
+      <rect x="0" y="237" width="400" height="300" fill="url(#vfWater)"/>
+      ${streaks}
+      <rect x="0" y="540" width="400" height="160" fill="#241c2e"/>
+      <path d="M140,700 Q200,630 178,560 L232,560 Q240,630 272,700 Z" fill="#5f8fb8"/>
+      <ellipse cx="60" cy="535" rx="90" ry="28" fill="#ffffff" opacity="0.4"/>
+      <ellipse cx="200" cy="540" rx="120" ry="32" fill="#ffffff" opacity="0.45"/>
+      <ellipse cx="340" cy="535" rx="90" ry="28" fill="#ffffff" opacity="0.4"/>
+      <ellipse cx="200" cy="510" rx="200" ry="22" fill="#ffffff" opacity="0.2"/>
+      ${rainbow}
+    `);
+  }
+
+  function sceneZambeziSunset(){
+    let reflect = '';
+    for (let i = 0; i < 8; i++){
+      const w = 120 - i * 12;
+      reflect += `<rect x="${200 - w / 2}" y="${432 + i * 16}" width="${w}" height="4" rx="2" fill="#ffd27a" opacity="${(0.55 - i * 0.06).toFixed(2)}"/>`;
+    }
+    return svgWrap(`
+      <defs>
+        <linearGradient id="zsSky" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0" stop-color="#2b1846"/>
+          <stop offset="0.6" stop-color="#c4473a"/>
+          <stop offset="1" stop-color="#f59e3b"/>
+        </linearGradient>
+        <linearGradient id="zsWater" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0" stop-color="#6a3047"/>
+          <stop offset="1" stop-color="#1b1430"/>
+        </linearGradient>
+      </defs>
+      <rect width="400" height="420" fill="url(#zsSky)"/>
+      <circle cx="200" cy="370" r="70" fill="#ffd27a" opacity="0.92"/>
+      <path d="M0,420 L0,395 Q60,380 120,392 Q180,372 250,390 Q320,376 400,392 L400,420 Z" fill="#3a1f3d"/>
+      <rect x="0" y="420" width="400" height="280" fill="url(#zsWater)"/>
+      ${reflect}
+      <path d="M0,412 L0,480 Q60,468 110,445 Q140,428 165,420 Z" fill="#1a0f22"/>
+      <path d="M58,452 Q52,390 70,330" fill="none" stroke="#1a0f22" stroke-width="6" stroke-linecap="round"/>
+      <g fill="none" stroke="#1a0f22" stroke-width="5" stroke-linecap="round">
+        <path d="M70,330 Q40,316 18,338"/>
+        <path d="M70,330 Q48,300 26,302"/>
+        <path d="M70,330 Q80,298 108,296"/>
+        <path d="M70,330 Q102,318 118,342"/>
+        <path d="M70,330 Q66,306 74,288"/>
+      </g>
+      <ellipse cx="325" cy="474" rx="22" ry="7" fill="#1a0f22"/>
+      <circle cx="312" cy="467" r="3" fill="#1a0f22"/>
+      <circle cx="320" cy="466" r="3" fill="#1a0f22"/>
+      <ellipse cx="362" cy="486" rx="16" ry="5" fill="#1a0f22"/>
+      <path d="M110,560 L300,560 Q280,576 205,578 Q130,576 110,560 Z" fill="#120a18"/>
+      <circle cx="212" cy="510" r="8" fill="#120a18"/>
+      <path d="M205,518 L219,518 L222,560 L201,560 Z" fill="#120a18"/>
+      <line x1="236" y1="470" x2="182" y2="610" stroke="#120a18" stroke-width="3" stroke-linecap="round"/>
+    `);
+  }
+
+  function sceneLuangwa(){
+    const ink = '#140c12';
+    return svgWrap(`
+      <defs>
+        <linearGradient id="slSky" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0" stop-color="#3d2a5c"/>
+          <stop offset="0.65" stop-color="#e07a4a"/>
+          <stop offset="1" stop-color="#f4c06a"/>
+        </linearGradient>
+        <linearGradient id="slGround" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0" stop-color="#3a2420"/>
+          <stop offset="1" stop-color="#140c12"/>
+        </linearGradient>
+      </defs>
+      <rect width="400" height="480" fill="url(#slSky)"/>
+      <circle cx="300" cy="440" r="46" fill="#ffe3a3" opacity="0.85"/>
+      <g fill="none" stroke="${ink}" stroke-width="2" stroke-linecap="round" opacity="0.8">
+        <path d="M250,170 l8,6 l8,-6"/>
+        <path d="M275,150 l6,5 l6,-5"/>
+        <path d="M232,140 l5,4 l5,-4"/>
+      </g>
+      <path d="M0,472 Q100,462 200,470 Q300,460 400,470 L400,480 L0,480 Z" fill="#2a1a1f"/>
+      <rect x="0" y="476" width="400" height="224" fill="url(#slGround)"/>
+      <ellipse cx="350" cy="462" rx="26" ry="6" fill="${ink}" opacity="0.7"/>
+      <line x1="350" y1="462" x2="350" y2="476" stroke="${ink}" stroke-width="3" opacity="0.7"/>
+      <g stroke="${ink}" stroke-width="8" stroke-linecap="round" fill="none">
+        <path d="M110,480 L118,360"/>
+        <path d="M118,372 L92,332"/>
+        <path d="M118,362 L144,326"/>
+      </g>
+      <ellipse cx="118" cy="320" rx="88" ry="16" fill="${ink}"/>
+      <ellipse cx="96" cy="310" rx="52" ry="12" fill="${ink}"/>
+      <ellipse cx="148" cy="312" rx="44" ry="10" fill="${ink}"/>
+      <g fill="${ink}">
+        <ellipse cx="275" cy="415" rx="56" ry="38"/>
+        <circle cx="218" cy="398" r="28"/>
+        <ellipse cx="236" cy="400" rx="18" ry="27"/>
+        <path d="M198,402 Q186,442 194,474 L203,474 Q198,442 208,412 Z"/>
+        <rect x="230" y="425" width="17" height="52" rx="4"/>
+        <rect x="252" y="428" width="16" height="48" rx="4"/>
+        <rect x="290" y="425" width="17" height="52" rx="4"/>
+        <rect x="308" y="422" width="16" height="54" rx="4"/>
+      </g>
+      <path d="M330,405 Q340,420 336,440" fill="none" stroke="${ink}" stroke-width="3"/>
+      <path d="M204,414 Q194,430 182,428" fill="none" stroke="#e9dcc0" stroke-width="3" stroke-linecap="round"/>
+    `);
+  }
+
+  function sceneFishEagle(){
+    let ripples = '';
+    for (let i = 0; i < 7; i++){
+      const y = 500 + i * 28;
+      const x = 40 + (i * 53 % 160);
+      ripples += `<path d="M${x},${y} q30,-6 60,0 t60,0" fill="none" stroke="#bfe9e0" stroke-width="2" opacity="${(0.28 - i * 0.025).toFixed(2)}"/>`;
+    }
+    let reeds = '';
+    for (let i = 0; i < 9; i++){
+      const x = 12 + i * 9;
+      const h = 70 + (i * 37 % 50);
+      reeds += `<path d="M${x},700 Q${x + 6},${700 - h / 2} ${x + (i % 2 ? 10 : -4)},${700 - h}" fill="none" stroke="#0a1a22" stroke-width="3" stroke-linecap="round"/>`;
+    }
+    return svgWrap(`
+      <defs>
+        <linearGradient id="feSky" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0" stop-color="#0f2a3d"/>
+          <stop offset="0.6" stop-color="#2f6f86"/>
+          <stop offset="1" stop-color="#9fd3c7"/>
+        </linearGradient>
+        <linearGradient id="feWater" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0" stop-color="#2a6375"/>
+          <stop offset="1" stop-color="#0c1f2b"/>
+        </linearGradient>
+      </defs>
+      <rect width="400" height="460" fill="url(#feSky)"/>
+      <circle cx="200" cy="450" r="52" fill="#fff1c1" opacity="0.6"/>
+      <path d="M0,460 L0,440 Q80,428 160,442 Q260,424 400,442 L400,460 Z" fill="#163a48"/>
+      <rect x="0" y="460" width="400" height="240" fill="url(#feWater)"/>
+      ${ripples}
+      ${reeds}
+      <g transform="translate(200,230) scale(2.4)">
+        <path d="${EAGLE_PATH}" fill="#3a2414"/>
+        <circle cx="0" cy="-17" r="6.5" fill="#f5f0e6"/>
+        <path d="M-6,-11 L6,-11 L4,-4 L-4,-4 Z" fill="#f5f0e6"/>
+        <path d="M-2,-21 L2,-21 L1,-17 Z" fill="#f2c744"/>
+        <path d="M-4,20 L0,30 L4,20 L0,17 Z" fill="#f5f0e6"/>
+      </g>
+    `);
+  }
+
+  const SCENES = [
+    { short: 'The flag',        caption: 'The flag of Zambia',                      draw: sceneFlag },
+    { short: 'Victoria Falls',  caption: 'Mosi-oa-Tunya · Victoria Falls',          draw: sceneVictoriaFalls },
+    { short: 'The Zambezi',     caption: 'Sunset on the Zambezi River',             draw: sceneZambeziSunset },
+    { short: 'South Luangwa',   caption: 'South Luangwa · elephants at dusk',       draw: sceneLuangwa },
+    { short: 'Fish eagle',      caption: 'African fish eagle · national bird',      draw: sceneFishEagle },
+  ];
+
+  // ---------- state ----------
+  const State = { WAITING: "WAITING", SEQUENCE: "SEQUENCE", FAILED: "FAILED", COMPLETE: "COMPLETE" };
+  let state = State.WAITING;
+  let chapter = 1;
+  let round = 1;
+  let bestChapter = 1;
+  let middleTaps = 0;
+  let requiredDaTaps = 2;
+  let targetNumber = 1;
+  let numberCount = 10;
+  let timeLimit = 3.0;
+  let timeRemaining = 3.0;
+  let rafId = null;
+  let lastFrameTs = null;
+
+  // ---------- dom ----------
+  const el = {
+    chapterVal: document.getElementById('chapterVal'),
+    roundVal: document.getElementById('roundVal'),
+    bestVal: document.getElementById('bestVal'),
+    playfield: document.getElementById('playfield'),
+    scene: document.getElementById('scene'),
+    sceneCaption: document.getElementById('sceneCaption'),
+    prompt: document.getElementById('prompt'),
+    middleBtn: document.getElementById('middleBtn'),
+    timerFill: document.getElementById('timerFill'),
+    toast: document.getElementById('toast'),
+    failOverlay: document.getElementById('failOverlay'),
+    failReason: document.getElementById('failReason'),
+    failChapter: document.getElementById('failChapter'),
+    failRounds: document.getElementById('failRounds'),
+    retryBtn: document.getElementById('retryBtn'),
+    winOverlay: document.getElementById('winOverlay'),
+    playAgainBtn: document.getElementById('playAgainBtn'),
+  };
+
+  // ---------- scene switching ----------
+  let currentScene = 0;
+  let sceneSwapTimer = null;
+  function setScene(chapterIndex, instant){ // 1-based
+    if (chapterIndex === currentScene) return;
+    currentScene = chapterIndex;
+    const s = SCENES[(chapterIndex - 1) % SCENES.length];
+    const apply = () => {
+      el.scene.innerHTML = s.draw();
+      el.sceneCaption.textContent = s.caption;
+      el.scene.classList.remove('fading');
+      el.sceneCaption.classList.remove('fading');
+    };
+    clearTimeout(sceneSwapTimer);
+    if (instant){ apply(); return; }
+    el.scene.classList.add('fading');
+    el.sceneCaption.classList.add('fading');
+    sceneSwapTimer = setTimeout(apply, 350);
+  }
+
+  // ---------- audio (tiny synthesized beeps, no assets) ----------
+  let actx = null;
+  function ensureAudio(){
+    if (!actx){
+      const Ctx = window.AudioContext || window.webkitAudioContext;
+      if (Ctx) actx = new Ctx();
+    } else if (actx.state === 'suspended'){
+      actx.resume();
+    }
+  }
+  function tone(freq, dur, type, gainVal){
+    if (!actx) return;
+    const osc = actx.createOscillator();
+    const gain = actx.createGain();
+    osc.type = type || 'sine';
+    osc.frequency.value = freq;
+    gain.gain.value = gainVal || 0.05;
+    gain.gain.exponentialRampToValueAtTime(0.0001, actx.currentTime + dur);
+    osc.connect(gain); gain.connect(actx.destination);
+    osc.start();
+    osc.stop(actx.currentTime + dur);
+  }
+  function sfxMiddle(n){ tone(n === 1 ? 420 : 520, 0.12, 'triangle', 0.06); }
+  function sfxCorrect(index, total){
+    const freq = 440 * Math.pow(2, index / total * 0.9);
+    tone(freq, 0.12, 'sine', 0.05);
+  }
+  function sfxFail(){ tone(140, 0.35, 'sawtooth', 0.07); }
+  function sfxRound(){ tone(660, 0.18, 'sine', 0.06); setTimeout(()=>tone(880,0.2,'sine',0.06), 90); }
+
+  // Inside the Android app, use Capacitor's Haptics plugin (the Android WebView
+  // ignores navigator.vibrate). In a normal browser, fall back to navigator.vibrate.
+  const Haptics = window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.Haptics;
+  function vibrate(pattern){
+    if (Haptics){
+      // patterns are [vibrate, pause, vibrate, ...] in ms
+      const steps = Array.isArray(pattern) ? pattern : [pattern];
+      let at = 0;
+      steps.forEach((ms, i) => {
+        if (i % 2 === 0 && ms > 0) setTimeout(() => Haptics.vibrate({ duration: ms }).catch(() => {}), at);
+        at += ms;
+      });
+      return;
+    }
+    if (navigator.vibrate) navigator.vibrate(pattern);
+  }
+
+  // ---------- helpers ----------
+  function setPrompt(text){ el.prompt.textContent = text; }
+
+  function updateHud(){
+    el.chapterVal.textContent = chapter;
+    el.roundVal.textContent = round + ' / ' + ROUNDS_PER_CHAPTER;
+    el.bestVal.textContent = bestChapter;
+  }
+
+  function showToast(text, cls){
+    el.toast.textContent = text;
+    el.toast.className = 'toast show' + (cls ? ' ' + cls : '');
+    setTimeout(()=>{ el.toast.className = 'toast'; }, 700);
+  }
+
+  // ---------- timer loop ----------
+  function startTimerLoop(){
+    lastFrameTs = null;
+    if (rafId) cancelAnimationFrame(rafId);
+    rafId = requestAnimationFrame(tick);
+  }
+  function stopTimerLoop(){
+    if (rafId) cancelAnimationFrame(rafId);
+    rafId = null;
+  }
+  function resetTimer(){
+    timeRemaining = timeLimit;
+  }
+  function tick(ts){
+    if (state !== State.WAITING && state !== State.SEQUENCE){ rafId = null; return; }
+    if (lastFrameTs === null) lastFrameTs = ts;
+    const dt = (ts - lastFrameTs) / 1000;
+    lastFrameTs = ts;
+
+    timeRemaining -= dt;
+    renderTimer();
+
+    if (timeRemaining <= 0){
+      triggerFail(state === State.WAITING ? "Didn't tap da in time" : "Ran out of time mid-sequence");
+      return;
+    }
+    rafId = requestAnimationFrame(tick);
+  }
+  function renderTimer(){
+    const frac = Math.max(0, timeRemaining / timeLimit);
+    el.timerFill.style.width = (frac * 100) + '%';
+    let color = 'var(--gold)';
+    if (frac < 0.55) color = '#f2a444';
+    if (frac < 0.28) color = 'var(--coral)';
+    el.timerFill.style.background = color;
+  }
+
+  // ---------- middle button ----------
+  let lastMiddleTapAt = 0;
+  el.middleBtn.addEventListener('pointerdown', (e) => {
+    if (e.pointerType === 'mouse' && e.button !== 0) return; // ignore right/middle mouse clicks
+    e.preventDefault(); // stop the browser from also firing a trailing synthetic click
+    const now = performance.now();
+    if (now - lastMiddleTapAt < 60) return; // ignore duplicate events from the same physical tap
+    lastMiddleTapAt = now;
+    onMiddleTap();
+  });
+
+  function onMiddleTap(){
+    ensureAudio();
+    if (state !== State.WAITING) return; // ignore once the gate is open, or after game over
+
+    middleTaps += 1;
+    sfxMiddle(middleTaps);
+    vibrate(15);
+    el.middleBtn.classList.remove('pulse'); void el.middleBtn.offsetWidth; el.middleBtn.classList.add('pulse');
+
+    if (middleTaps < requiredDaTaps){
+      resetTimer();
+      setPrompt('Tap once more');
+    } else {
+      middleTaps = 0;
+      resetTimer();
+      state = State.SEQUENCE;
+      setPrompt('Go — tap the next number');
+    }
+  }
+
+  // ---------- number sequence ----------
+  function spawnNumbers(){
+    targetNumber = 1;
+    clearNumbers();
+
+    const rect = el.playfield.getBoundingClientRect();
+    const { points, btnSize } = generatePositions(rect.width, rect.height, numberCount);
+    const values = Array.from({length: numberCount}, (_, i) => i + 1);
+    const fontSize = Math.max(12, Math.min(18, btnSize * 0.34));
+
+    values.forEach((val, i) => {
+      const btn = document.createElement('button');
+      btn.className = 'num-btn';
+      btn.textContent = val;
+      btn.style.left = points[i].x + 'px';
+      btn.style.top = points[i].y + 'px';
+      btn.style.width = btnSize + 'px';
+      btn.style.height = btnSize + 'px';
+      btn.style.fontSize = fontSize + 'px';
+      btn.style.animationDelay = (i * 0.02) + 's';
+      btn.dataset.value = val;
+      btn.addEventListener('click', () => onNumberTap(val, btn));
+      el.playfield.appendChild(btn);
+    });
+  }
+
+  function clearNumbers(){
+    el.playfield.querySelectorAll('.num-btn').forEach(n => n.remove());
+  }
+
+  function generatePositions(w, h, count){
+    // keep clear of the top prompt, the middle button hub and the scene caption
+    const marginTop = 70, marginBottom = 40, marginSide = 34;
+    const usableW = w - marginSide * 2;
+    const usableH = h - marginTop - marginBottom;
+    const centerX = w / 2, centerY = h / 2;
+    const HUB_RADIUS = 66; // .middle-wrap is 132px wide
+    const GAP = 6;         // breathing room between a number and the da button
+
+    // Build a grid; if the cells around the da button can't be used, add more
+    // cells (smaller buttons) until there are enough clear cells for every number.
+    let cells, cellW, cellH, btnSize, minDist;
+    for (let extra = 0; ; extra++){
+      const slots = count + extra;
+      const cols = Math.ceil(Math.sqrt(slots * usableW / usableH));
+      const rows = Math.ceil(slots / cols);
+      cellW = usableW / cols;
+      cellH = usableH / rows;
+      btnSize = Math.max(30, Math.min(52, Math.min(cellW, cellH) * 0.72));
+      minDist = HUB_RADIUS + btnSize / 2 + GAP;
+
+      cells = [];
+      for (let r = 0; r < rows; r++){
+        for (let c = 0; c < cols; c++){
+          const cx = marginSide + cellW * (c + 0.5);
+          const cy = marginTop + cellH * (r + 0.5);
+          if (Math.hypot(cx - centerX, cy - centerY) >= minDist) cells.push({ cx, cy });
+        }
+      }
+      if (cells.length >= count || extra > count * 3) break;
+    }
+    shuffle(cells);
+
+    const points = cells.slice(0, count).map(cell => {
+      let x = cell.cx + (Math.random() - 0.5) * cellW * 0.4;
+      let y = cell.cy + (Math.random() - 0.5) * cellH * 0.4;
+      // the random nudge must never push a number into the da button
+      const dx = x - centerX, dy = y - centerY;
+      const d = Math.hypot(dx, dy);
+      if (d < minDist){
+        if (d === 0){ x = cell.cx; y = cell.cy; }
+        else { x = centerX + dx / d * minDist; y = centerY + dy / d * minDist; }
+      }
+      return { x, y };
+    });
+
+    return { points, btnSize };
+  }
+
+  function shuffle(arr){
+    for (let i = arr.length - 1; i > 0; i--){
+      const j = Math.floor(Math.random() * (i + 1));
+      [arr[i], arr[j]] = [arr[j], arr[i]];
+    }
+    return arr;
+  }
+
+  function onNumberTap(value, btn){
+    if (state === State.FAILED || state === State.COMPLETE) return;
+
+    if (state === State.WAITING){
+      btn.classList.add('wrong');
+      triggerFail('Tapped a number without tapping da first');
+      return;
+    }
+
+    if (value === targetNumber){
+      btn.classList.add('correct');
+      sfxCorrect(targetNumber - 1, numberCount);
+      vibrate(12);
+      targetNumber += 1;
+
+      if (targetNumber > numberCount){
+        resetTimer();
+        onRoundComplete();
+      } else {
+        requiredDaTaps = 2;
+        middleTaps = 0;
+        state = State.WAITING;
+        resetTimer();
+        setPrompt('Tap da twice before the next number');
+      }
+    } else {
+      btn.classList.add('wrong');
+      triggerFail('Tapped ' + value + ' before ' + targetNumber);
+    }
+  }
+
+  // ---------- round / chapter flow ----------
+  function onRoundComplete(){
+    sfxRound();
+    vibrate([10, 40, 10]);
+    showToast('Round clear', '');
+
+    round += 1;
+    if (round > ROUNDS_PER_CHAPTER){
+      chapter += 1;
+      round = 1;
+      if (chapter > CHAPTER_COUNT){
+        triggerComplete();
+        return;
+      }
+      bestChapter = Math.max(bestChapter, chapter);
+      setScene(chapter);
+      const name = SCENES[(chapter - 1) % SCENES.length].short;
+      setTimeout(() => showToast('Chapter ' + chapter + ' · ' + name, 'chapter'), 760);
+    }
+
+    const cfg = roundConfig(chapter, round);
+    timeLimit = cfg.timeLimit;
+    numberCount = cfg.numberCount;
+    updateHud();
+    prepareRound();
+  }
+
+  function triggerFail(reason){
+    if (state === State.FAILED || state === State.COMPLETE) return;
+    state = State.FAILED;
+    stopTimerLoop();
+    sfxFail();
+    vibrate([0, 60, 40, 60]);
+    el.playfield.classList.remove('shake'); void el.playfield.offsetWidth; el.playfield.classList.add('shake');
+
+    el.failReason.textContent = reason;
+    el.failChapter.textContent = chapter;
+    el.failRounds.textContent = (round - 1);
+    setTimeout(() => el.failOverlay.classList.add('show'), 260);
+  }
+
+  function triggerComplete(){
+    state = State.COMPLETE;
+    stopTimerLoop();
+    chapter = CHAPTER_COUNT;
+    bestChapter = CHAPTER_COUNT;
+    updateHud();
+    sfxRound();
+    vibrate([10, 40, 10, 40, 20]);
+    setTimeout(() => el.winOverlay.classList.add('show'), 260);
+  }
+
+  el.retryBtn.addEventListener('click', () => {
+    el.failOverlay.classList.remove('show');
+    resetGame(true);
+  });
+
+  el.playAgainBtn.addEventListener('click', () => {
+    el.winOverlay.classList.remove('show');
+    resetGame(true);
+  });
+
+  // ---------- reset / init ----------
+  function resetGame(keepBest){
+    chapter = START_CHAPTER;
+    round = 1;
+    if (!keepBest) bestChapter = START_CHAPTER;
+    setScene(chapter, currentScene === 0);
+    const cfg = roundConfig(chapter, round);
+    timeLimit = cfg.timeLimit;
+    numberCount = cfg.numberCount;
+    updateHud();
+    prepareRound();
+    startTimerLoop();
+  }
+
+  function prepareRound(){
+    clearNumbers();
+    middleTaps = 0;
+    requiredDaTaps = 2;
+    state = State.WAITING;
+    spawnNumbers();          // numbers are visible right away — don't touch them yet
+    resetTimer();
+    renderTimer();
+    setPrompt('Tap da twice to start — don\'t touch the numbers yet');
+  }
+
+  window.addEventListener('resize', () => {
+    if (state === State.WAITING || state === State.SEQUENCE) spawnNumbers();
+  });
+
+  resetGame(false);
+})();
+</script>
+
+</body>
+</html>
