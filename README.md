@@ -1,12 +1,21 @@
 # 2DaDa
 
-A fast tap-sequence game for Android. Tap **da** twice, then tap the next number in order before the timer runs out. You get through 5 chapters, and each one is set against a different scene from Zambia:
+A fast tap-sequence game for Android. Each round starts by tapping **1**. After that, tap **da** twice before each of the next numbers, in order, before the timer runs out. You get through 5 chapters, and each one is set against a different scene from Zambia:
 
 1. The flag of Zambia
 2. Mosi-oa-Tunya (Victoria Falls)
 3. Sunset on the Zambezi River
 4. South Luangwa: elephants at dusk
 5. The African fish eagle, Zambia's national bird
+
+## Rewards
+
+Clearing chapters and rounds unlocks rewards, which you can browse in the **Rewards** screen on the welcome page:
+
+- **Themes:** collect the Zambia scenes and use one as your welcome-page background.
+- **Number designs:** Classic, Copper, Malachite, Chitenge and Flag colours.
+
+Progress is saved on the device.
 
 ## Project layout
 

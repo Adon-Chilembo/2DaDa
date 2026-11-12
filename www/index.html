@@ -275,6 +275,329 @@
   .win-word{ color: var(--mint); }
   .win-btn{ background: var(--mint); color: #0e2a1d; }
 
+  /* ---------- welcome page ---------- */
+  .welcome{
+    position:absolute; inset:0;
+    z-index: 20;
+    background: var(--bg);
+    overflow:hidden;
+    transition: opacity 0.45s ease, transform 0.45s ease;
+  }
+  .welcome.leaving{ opacity:0; transform: scale(1.04); pointer-events:none; }
+  .welcome.gone{ display:none; }
+  .welcome-scene{ position:absolute; inset:0; }
+  .welcome-scene svg{ width:100%; height:100%; display:block; }
+  .welcome-shade{
+    position:absolute; inset:0;
+    background:
+      radial-gradient(ellipse at 50% 50%, rgba(20,17,31,0.55), rgba(20,17,31,0) 60%),
+      linear-gradient(to bottom, rgba(20,17,31,0.35), rgba(20,17,31,0) 35%, rgba(20,17,31,0) 70%, rgba(20,17,31,0.7));
+  }
+  .welcome-content{
+    position:absolute; inset:0;
+    display:flex; flex-direction:column; align-items:center; justify-content:center;
+    text-align:center;
+    padding: env(safe-area-inset-top) 24px env(safe-area-inset-bottom);
+  }
+  .welcome-kicker{
+    font-family:'JetBrains Mono', monospace;
+    font-weight:700;
+    font-size: 13px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--gold);
+    text-shadow: 0 1px 6px rgba(0,0,0,0.7);
+  }
+  .welcome-title{
+    margin: 6px 0 2px;
+    font-size: 54px;
+    font-weight: 700;
+    line-height: 1;
+    color: var(--ink);
+    text-shadow: 0 2px 18px rgba(0,0,0,0.6);
+  }
+  .welcome-sub{
+    font-size: 18px;
+    color: var(--ink);
+    opacity: 0.9;
+    text-shadow: 0 1px 8px rgba(0,0,0,0.7);
+    margin-bottom: 34px;
+  }
+  .start-btn{
+    background: var(--gold);
+    color: #221b0a;
+    border: none;
+    font-family:'Space Grotesk', sans-serif;
+    font-weight: 700;
+    font-size: 20px;
+    padding: 18px 64px;
+    border-radius: 999px;
+    cursor: pointer;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.45);
+    animation: startGlow 2.2s ease-in-out infinite;
+  }
+  .start-btn:active{ transform: scale(0.96); }
+  @keyframes startGlow{
+    0%,100%{ box-shadow: 0 10px 30px rgba(0,0,0,0.45), 0 0 0 0 rgba(242,199,68,0.45); }
+    50%{ box-shadow: 0 10px 30px rgba(0,0,0,0.45), 0 0 0 14px rgba(242,199,68,0); }
+  }
+  .welcome-tip{
+    margin-top: 22px;
+    font-size: 13px;
+    color: var(--ink);
+    opacity: 0.8;
+    text-shadow: 0 1px 6px rgba(0,0,0,0.8);
+    max-width: 260px;
+  }
+  .welcome-caption{
+    position:absolute; left:0; right:0;
+    bottom: calc(14px + env(safe-area-inset-bottom));
+    text-align:center;
+    font-size: 11px;
+    letter-spacing: 0.04em;
+    color: rgba(245,240,255,0.75);
+    text-shadow: 0 1px 3px rgba(0,0,0,0.8);
+  }
+
+  .ghost-btn{
+    margin-top: 14px;
+    background: rgba(20,17,31,0.55);
+    color: var(--ink);
+    border: 1px solid rgba(245,240,255,0.25);
+    font-family:'Space Grotesk', sans-serif;
+    font-weight: 700;
+    font-size: 15px;
+    padding: 12px 34px;
+    border-radius: 999px;
+    cursor: pointer;
+    display: inline-flex; align-items:center; gap: 8px;
+    -webkit-backdrop-filter: blur(4px);
+    backdrop-filter: blur(4px);
+  }
+  .ghost-btn:active{ transform: scale(0.97); }
+  .badge{
+    background: var(--coral);
+    color: #fff;
+    font-family:'JetBrains Mono', monospace;
+    font-weight: 700;
+    font-size: 11px;
+    min-width: 20px; height: 20px;
+    padding: 0 6px;
+    border-radius: 999px;
+    display: inline-flex; align-items:center; justify-content:center;
+  }
+  .badge[hidden]{ display:none; }
+
+  /* other themes on the welcome page get a slow drifting camera */
+  .welcome-scene.drift svg{
+    transform-origin: center;
+    animation: sceneDrift 16s ease-in-out infinite alternate;
+  }
+  @keyframes sceneDrift{
+    from{ transform: scale(1.04) translate(-1.5%, 0); }
+    to{ transform: scale(1.12) translate(1.5%, -1%); }
+  }
+
+  /* ---------- number designs (rewards) ---------- */
+  .skin-copper .num-btn{
+    background: radial-gradient(circle at 35% 30%, #f8c08c, #c26a32 55%, #6e3415);
+    color: #fff6ec;
+    text-shadow: 0 1px 2px rgba(0,0,0,0.55);
+    box-shadow: 0 0 0 1px #e08a4f, 0 4px 14px rgba(0,0,0,0.4);
+  }
+  .skin-malachite .num-btn{
+    background: repeating-radial-gradient(circle at 30% 115%, #0b4d36 0 3px, #1fa673 3px 6px, #0f6b4a 6px 9px, #2cc489 9px 11px);
+    color: #ffffff;
+    text-shadow: 0 1px 3px rgba(0,0,0,0.8);
+    box-shadow: 0 0 0 1px #2cc489, 0 4px 14px rgba(0,0,0,0.4);
+  }
+  .skin-chitenge .num-btn{
+    background:
+      radial-gradient(circle, #1e1a2e 0 44%, transparent 46%),
+      repeating-linear-gradient(45deg, #e8552a 0 5px, #f2c744 5px 10px, #1b3a8a 10px 15px, #f5f0ff 15px 17px);
+    color: #ffffff;
+    box-shadow: 0 0 0 1px #f2c744, 0 4px 14px rgba(0,0,0,0.4);
+  }
+  .skin-flag .num-btn{
+    background:
+      radial-gradient(circle, #198a00 0 50%, transparent 52%),
+      conic-gradient(#de2010 0 33.3%, #000000 0 66.6%, #ef7d00 0);
+    color: #ffffff;
+    text-shadow: 0 1px 2px rgba(0,0,0,0.6);
+    box-shadow: 0 0 0 1px #ef7d00, 0 4px 14px rgba(0,0,0,0.4);
+  }
+  .num-btn.preview{
+    position: relative; left:auto; top:auto;
+    transform: none; opacity: 1; animation: none;
+    width: 48px; height: 48px; font-size: 17px;
+    pointer-events: none;
+  }
+
+  /* ---------- rewards screen ---------- */
+  .rewards{
+    position:absolute; inset:0;
+    z-index: 30;
+    background: var(--bg);
+    display:flex; flex-direction:column;
+    transform: translateY(100%);
+    transition: transform 0.35s ease;
+  }
+  .rewards.open{ transform: none; }
+  .rewards-head{
+    display:flex; align-items:center; justify-content:space-between;
+    padding: calc(14px + env(safe-area-inset-top)) 12px 12px;
+    border-bottom: 1px solid var(--panel-line);
+    flex-shrink: 0;
+  }
+  .back-btn{
+    background:none; border:none;
+    color: var(--ink);
+    font-family:'Space Grotesk', sans-serif; font-weight:700; font-size: 15px;
+    padding: 8px; cursor:pointer;
+    min-width: 72px; text-align:left;
+  }
+  .rewards-title{ font-size: 20px; font-weight: 700; }
+  .rewards-count{
+    font-family:'JetBrains Mono', monospace; font-weight:700; font-size: 12px;
+    color: var(--gold);
+    min-width: 72px; text-align:right; padding-right: 8px;
+  }
+  .rewards-body{
+    flex:1; overflow-y:auto;
+    padding: 16px 16px calc(28px + env(safe-area-inset-bottom));
+    -webkit-overflow-scrolling: touch;
+  }
+  .rewards-section h2{
+    font-size: 12px; letter-spacing: 0.1em; text-transform: uppercase;
+    color: var(--muted); font-weight: 700;
+    margin: 6px 0 4px;
+  }
+  .rewards-section p{ margin: 0 0 12px; font-size: 13px; color: var(--muted); }
+  .reward-grid{
+    display:grid; grid-template-columns: repeat(2, 1fr);
+    gap: 12px; margin-bottom: 26px;
+  }
+  .reward-grid.skins{ grid-template-columns: repeat(3, 1fr); }
+  .reward-card{
+    position:relative;
+    background: var(--panel);
+    border: 1px solid var(--panel-line);
+    border-radius: 14px;
+    padding: 8px 8px 10px;
+    color: var(--ink);
+    font-family:'Space Grotesk', sans-serif;
+    text-align:left;
+    cursor:pointer;
+    display:flex; flex-direction:column; gap: 6px;
+  }
+  .reward-card:active{ transform: scale(0.98); }
+  .reward-card.locked{ cursor: default; }
+  .reward-card.locked:active{ transform:none; }
+  .reward-card.equipped{ border-color: var(--gold); box-shadow: 0 0 0 1px var(--gold); }
+  .reward-card .thumb{
+    position:relative;
+    aspect-ratio: 3 / 4;
+    border-radius: 10px;
+    overflow:hidden;
+    background: #000;
+  }
+  .reward-card .thumb svg{ width:100%; height:100%; display:block; }
+  .reward-card.locked .thumb > svg:first-child{ filter: grayscale(1) brightness(0.4); }
+  .skin-stage{
+    position:relative;
+    height: 74px;
+    display:flex; align-items:center; justify-content:center;
+    background: var(--bg);
+    border-radius: 10px;
+  }
+  .reward-card.locked .skin-stage .num-btn{ filter: grayscale(1) brightness(0.45); }
+  .reward-card .lock,
+  .reward-card .thumb svg.lock{
+    position:absolute; left:50%; top:50%;
+    width: 26px; height: 26px;
+    transform: translate(-50%, -50%);
+    color: var(--ink);
+  }
+  .skins .reward-card{ align-items:center; text-align:center; }
+  .rc-name{ font-size: 14px; font-weight: 700; }
+  .rc-status{ font-size: 11px; color: var(--muted); line-height: 1.3; }
+  .reward-card.equipped .rc-status{ color: var(--gold); }
+  .new-badge{
+    position:absolute; top: 12px; right: 12px;
+    background: var(--coral); color:#fff;
+    font-family:'JetBrains Mono', monospace; font-weight:700; font-size: 10px;
+    letter-spacing: 0.06em;
+    padding: 3px 7px; border-radius: 999px;
+  }
+
+  /* ---------- reward unlocked pop-up ---------- */
+  .reward-banner{
+    position:absolute; left:50%;
+    top: calc(12px + env(safe-area-inset-top));
+    transform: translate(-50%, -160%);
+    z-index: 40;
+    background: var(--panel);
+    border: 1px solid var(--gold);
+    border-radius: 14px;
+    padding: 10px 20px;
+    display:flex; flex-direction:column; align-items:center; gap: 2px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+    transition: transform 0.35s cubic-bezier(.2,.9,.3,1.2);
+    pointer-events:none;
+    white-space: nowrap;
+  }
+  .reward-banner.show{ transform: translate(-50%, 0); }
+  .rb-kicker{
+    font-family:'JetBrains Mono', monospace; font-weight:700; font-size: 10px;
+    letter-spacing: 0.14em; text-transform: uppercase;
+    color: var(--gold);
+  }
+  .rb-text{ font-weight: 700; font-size: 15px; }
+
+  /* ---------- end-of-game buttons ---------- */
+  .overlay-actions{ display:flex; flex-direction:column; align-items:center; gap: 12px; }
+  .home-btn{
+    background:none;
+    border: 1px solid var(--panel-line);
+    color: var(--ink);
+    font-family:'Space Grotesk', sans-serif; font-weight:700; font-size: 15px;
+    padding: 11px 36px;
+    border-radius: 999px;
+    cursor:pointer;
+  }
+  .home-btn:active{ transform: scale(0.97); }
+
+  /* live Victoria Falls animation (welcome page only) */
+  .welcome .vf-stream{ animation: vfFall 0.9s linear infinite; }
+  @keyframes vfFall{ to{ stroke-dashoffset: -58; } }
+  .welcome .vf-mist{
+    transform-box: fill-box; transform-origin: center;
+    animation: vfMist 4s ease-in-out infinite alternate;
+  }
+  @keyframes vfMist{
+    from{ transform: translateX(-12px) scale(1); opacity: 0.3; }
+    to{ transform: translateX(12px) scale(1.08); opacity: 0.55; }
+  }
+  .welcome .vf-spray{
+    transform-box: fill-box; transform-origin: center;
+    animation: vfSpray 9s ease-in-out infinite alternate;
+  }
+  @keyframes vfSpray{
+    from{ transform: translateY(0) scale(1); }
+    to{ transform: translateY(-16px) scale(1.1); }
+  }
+  .welcome .vf-rainbow{ animation: vfBow 5s ease-in-out infinite alternate; }
+  @keyframes vfBow{ from{ opacity: 0.55; } to{ opacity: 1; } }
+  .welcome .vf-bird{ animation: vfFly 15s linear infinite; }
+  @keyframes vfFly{
+    0%{ transform: translate(-60px, 0); }
+    50%{ transform: translate(200px, -14px); }
+    100%{ transform: translate(460px, 4px); }
+  }
+  @media (prefers-reduced-motion: reduce){
+    .welcome *, .start-btn{ animation: none !important; }
+  }
+
   .footer-hint{
     padding: 12px 20px calc(18px + env(safe-area-inset-bottom));
     text-align:center;
@@ -314,7 +637,7 @@
     <div class="scene-shade"></div>
     <div class="scene-caption" id="sceneCaption"></div>
 
-    <div class="prompt" id="prompt">Tap da da first — don't touch the numbers yet</div>
+    <div class="prompt" id="prompt">Tap 1 to start</div>
 
     <div class="middle-wrap">
       <button id="middleBtn">da</button>
@@ -323,7 +646,7 @@
     <div class="toast" id="toast"></div>
   </div>
 
-  <div class="footer-hint">Numbers appear right away — tapping one before finishing da da is an instant fail</div>
+  <div class="footer-hint">Tap 1, then da da before every next number — tapping a number before finishing da da is an instant fail</div>
 
   <div class="fail-overlay" id="failOverlay">
     <div class="fail-word">Missed it</div>
@@ -338,7 +661,10 @@
         <span class="value" id="failRounds">0</span>
       </div>
     </div>
-    <button class="retry-btn" id="retryBtn">Retry</button>
+    <div class="overlay-actions">
+      <button class="retry-btn" id="retryBtn">Retry</button>
+      <button class="home-btn" data-home>Home</button>
+    </div>
   </div>
 
   <div class="fail-overlay win-overlay" id="winOverlay">
@@ -350,7 +676,49 @@
         <span class="value" id="winChapters">5</span>
       </div>
     </div>
-    <button class="retry-btn win-btn" id="playAgainBtn">Play again</button>
+    <div class="overlay-actions">
+      <button class="retry-btn win-btn" id="playAgainBtn">Play again</button>
+      <button class="home-btn" data-home>Home</button>
+    </div>
+  </div>
+
+  <div class="welcome" id="welcome">
+    <div class="welcome-scene" id="welcomeScene"></div>
+    <div class="welcome-shade"></div>
+    <div class="welcome-content">
+      <div class="welcome-kicker">Mwaiseni</div>
+      <h1 class="welcome-title">Welcome</h1>
+      <div class="welcome-sub">to 2DaDa</div>
+      <button class="start-btn" id="startBtn">Start</button>
+      <button class="ghost-btn" id="rewardsBtn">Rewards <span class="badge" id="rewardsBadge" hidden></span></button>
+      <div class="welcome-tip">Tap 1, then da da before every next number</div>
+    </div>
+    <div class="welcome-caption" id="welcomeCaption">Mosi-oa-Tunya · Victoria Falls</div>
+  </div>
+
+  <div class="rewards" id="rewards" aria-hidden="true">
+    <div class="rewards-head">
+      <button class="back-btn" id="rewardsBack">‹ Back</button>
+      <div class="rewards-title">Rewards</div>
+      <div class="rewards-count" id="rewardsCount">0 / 0</div>
+    </div>
+    <div class="rewards-body">
+      <section class="rewards-section">
+        <h2>Themes</h2>
+        <p>Collect a scene of Zambia by clearing chapters, then use it on your welcome page.</p>
+        <div class="reward-grid" id="themeGrid"></div>
+      </section>
+      <section class="rewards-section">
+        <h2>Number designs</h2>
+        <p>Change how the numbers look while you play.</p>
+        <div class="reward-grid skins" id="skinGrid"></div>
+      </section>
+    </div>
+  </div>
+
+  <div class="reward-banner" id="rewardBanner">
+    <span class="rb-kicker">Reward unlocked</span>
+    <span class="rb-text" id="rewardBannerText"></span>
   </div>
 
 </div>
@@ -399,7 +767,12 @@
   // Eagle in flight, wings raised (used on the flag and for the fish eagle)
   const EAGLE_PATH = "M0,-18 C4,-18 6,-14 5,-10 L14,-14 C26,-34 46,-44 66,-46 C58,-38 54,-30 52,-22 C44,-20 36,-14 30,-6 C22,0 14,4 8,8 L12,26 L4,20 L0,30 L-4,20 L-12,26 L-8,8 C-14,4 -22,0 -30,-6 C-36,-14 -44,-20 -52,-22 C-54,-30 -58,-38 -66,-46 C-46,-44 -26,-34 -14,-14 L-5,-10 C-6,-14 -4,-18 0,-18 Z";
 
+  // Each drawn scene gets unique gradient ids, because the same scene can be on
+  // screen several times (game background, welcome page, reward thumbnails).
+  let svgUid = 0;
   function svgWrap(inner){
+    const p = 'g' + (++svgUid) + '-';
+    inner = inner.replace(/id="([^"]+)"/g, 'id="' + p + '$1"').replace(/url\(#([^)]+)\)/g, 'url(#' + p + '$1)');
     return '<svg viewBox="0 0 400 700" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg">' + inner + '</svg>';
   }
 
@@ -426,13 +799,21 @@
     `);
   }
 
-  function sceneVictoriaFalls(){
+  // live = true draws the animated version used on the welcome page
+  // (falling water, drifting mist and spray, shimmering rainbow, birds).
+  function sceneVictoriaFalls(live){
     let streaks = '';
     for (let i = 0; i < 26; i++){
       const x = 6 + i * 15.4 + (i % 3) * 3;
       const w = 1.5 + (i * 7 % 4);
       const op = (0.16 + (i * 13 % 5) * 0.07).toFixed(2);
-      streaks += `<rect x="${x}" y="237" width="${w}" height="300" fill="#ffffff" opacity="${op}"/>`;
+      if (live){
+        const dur = (0.7 + (i * 17 % 5) * 0.12).toFixed(2);
+        const delay = (i * 0.13).toFixed(2);
+        streaks += `<line class="vf-stream" x1="${x + w / 2}" y1="237" x2="${x + w / 2}" y2="537" stroke="#ffffff" stroke-width="${w}" opacity="${op}" stroke-dasharray="40 18" style="animation-duration:${dur}s;animation-delay:-${delay}s"/>`;
+      } else {
+        streaks += `<rect x="${x}" y="237" width="${w}" height="300" fill="#ffffff" opacity="${op}"/>`;
+      }
     }
     const bow = ['#ff4d4d','#ff9f40','#ffe066','#6fdc8c','#5aa9ff','#a77bff'];
     let rainbow = '';
@@ -440,6 +821,15 @@
       const r = 150 - i * 8;
       rainbow += `<path d="M${200 - r},610 A${r},${r} 0 0 1 ${200 + r},610" fill="none" stroke="${c}" stroke-width="8" opacity="0.32"/>`;
     });
+    if (live) rainbow = `<g class="vf-rainbow">${rainbow}</g>`;
+    const mist = live ? 'class="vf-mist" ' : '';
+    const spray = live ? 'class="vf-spray" ' : '';
+    let birds = '';
+    if (live){
+      [[90, 0, 1], [70, -5, 0.8], [120, -9.5, 0.9]].forEach(([y, delay, s]) => {
+        birds += `<g class="vf-bird" style="animation-delay:${delay}s"><path d="M0,${y} q6,-6 12,0 q6,-6 12,0" transform="scale(${s})" fill="none" stroke="#1a2440" stroke-width="2.2" stroke-linecap="round"/></g>`;
+      });
+    }
     return svgWrap(`
       <defs>
         <linearGradient id="vfSky" x1="0" y1="0" x2="0" y2="1">
@@ -452,19 +842,20 @@
         </linearGradient>
       </defs>
       <rect width="400" height="240" fill="url(#vfSky)"/>
-      <ellipse cx="200" cy="130" rx="170" ry="95" fill="#ffffff" opacity="0.12"/>
-      <ellipse cx="140" cy="80" rx="90" ry="60" fill="#ffffff" opacity="0.10"/>
-      <ellipse cx="280" cy="100" rx="80" ry="55" fill="#ffffff" opacity="0.08"/>
+      <ellipse ${spray}cx="200" cy="130" rx="170" ry="95" fill="#ffffff" opacity="0.12"/>
+      <ellipse ${spray}style="animation-delay:-3s" cx="140" cy="80" rx="90" ry="60" fill="#ffffff" opacity="0.10"/>
+      <ellipse ${spray}style="animation-delay:-6s" cx="280" cy="100" rx="80" ry="55" fill="#ffffff" opacity="0.08"/>
+      ${birds}
       <path d="M0,232 L0,200 Q15,182 35,196 Q50,176 72,192 Q90,172 112,190 Q130,178 150,194 Q172,170 196,190 Q215,178 236,194 Q256,172 280,190 Q300,176 322,194 Q342,174 364,192 Q382,182 400,196 L400,232 Z" fill="#1f4d2b"/>
       <rect x="0" y="226" width="400" height="12" fill="#3b2f2a"/>
       <rect x="0" y="237" width="400" height="300" fill="url(#vfWater)"/>
       ${streaks}
       <rect x="0" y="540" width="400" height="160" fill="#241c2e"/>
       <path d="M140,700 Q200,630 178,560 L232,560 Q240,630 272,700 Z" fill="#5f8fb8"/>
-      <ellipse cx="60" cy="535" rx="90" ry="28" fill="#ffffff" opacity="0.4"/>
-      <ellipse cx="200" cy="540" rx="120" ry="32" fill="#ffffff" opacity="0.45"/>
-      <ellipse cx="340" cy="535" rx="90" ry="28" fill="#ffffff" opacity="0.4"/>
-      <ellipse cx="200" cy="510" rx="200" ry="22" fill="#ffffff" opacity="0.2"/>
+      <ellipse ${mist}cx="60" cy="535" rx="90" ry="28" fill="#ffffff" opacity="0.4"/>
+      <ellipse ${mist}style="animation-delay:-1.3s" cx="200" cy="540" rx="120" ry="32" fill="#ffffff" opacity="0.45"/>
+      <ellipse ${mist}style="animation-delay:-2.6s" cx="340" cy="535" rx="90" ry="28" fill="#ffffff" opacity="0.4"/>
+      <ellipse ${mist}style="animation-delay:-0.7s" cx="200" cy="510" rx="200" ry="22" fill="#ffffff" opacity="0.2"/>
       ${rainbow}
     `);
   }
@@ -603,14 +994,14 @@
 
   const SCENES = [
     { short: 'The flag',        caption: 'The flag of Zambia',                      draw: sceneFlag },
-    { short: 'Victoria Falls',  caption: 'Mosi-oa-Tunya · Victoria Falls',          draw: sceneVictoriaFalls },
+    { short: 'Victoria Falls',  caption: 'Mosi-oa-Tunya · Victoria Falls',          draw: () => sceneVictoriaFalls(false) },
     { short: 'The Zambezi',     caption: 'Sunset on the Zambezi River',             draw: sceneZambeziSunset },
     { short: 'South Luangwa',   caption: 'South Luangwa · elephants at dusk',       draw: sceneLuangwa },
     { short: 'Fish eagle',      caption: 'African fish eagle · national bird',      draw: sceneFishEagle },
   ];
 
   // ---------- state ----------
-  const State = { WAITING: "WAITING", SEQUENCE: "SEQUENCE", FAILED: "FAILED", COMPLETE: "COMPLETE" };
+  const State = { IDLE: "IDLE", WAITING: "WAITING", SEQUENCE: "SEQUENCE", FAILED: "FAILED", COMPLETE: "COMPLETE" };
   let state = State.WAITING;
   let chapter = 1;
   let round = 1;
@@ -750,7 +1141,10 @@
     renderTimer();
 
     if (timeRemaining <= 0){
-      triggerFail(state === State.WAITING ? "Didn't tap da in time" : "Ran out of time mid-sequence");
+      let reason = "Ran out of time mid-sequence";
+      if (state === State.WAITING) reason = "Didn't tap da in time";
+      else if (targetNumber === 1) reason = "Didn't tap 1 in time";
+      triggerFail(reason);
       return;
     }
     rafId = requestAnimationFrame(tick);
@@ -784,8 +1178,8 @@
     vibrate(15);
     el.middleBtn.classList.remove('pulse'); void el.middleBtn.offsetWidth; el.middleBtn.classList.add('pulse');
 
+    // The timer only restarts when da-da is complete (the second da), never on the first.
     if (middleTaps < requiredDaTaps){
-      resetTimer();
       setPrompt('Tap once more');
     } else {
       middleTaps = 0;
@@ -883,7 +1277,7 @@
   }
 
   function onNumberTap(value, btn){
-    if (state === State.FAILED || state === State.COMPLETE) return;
+    if (state !== State.WAITING && state !== State.SEQUENCE) return;
 
     if (state === State.WAITING){
       btn.classList.add('wrong');
@@ -901,10 +1295,10 @@
         resetTimer();
         onRoundComplete();
       } else {
+        // no timer restart here: the clock keeps running until da-da is done
         requiredDaTaps = 2;
         middleTaps = 0;
         state = State.WAITING;
-        resetTimer();
         setPrompt('Tap da twice before the next number');
       }
     } else {
@@ -920,6 +1314,13 @@
     showToast('Round clear', '');
 
     round += 1;
+
+    // record progress (saved on the device) and hand out any new rewards
+    progress.rounds += 1;
+    if (round > ROUNDS_PER_CHAPTER) progress.cleared = Math.max(progress.cleared, chapter);
+    saveProgress();
+    checkUnlocks(true);
+
     if (round > ROUNDS_PER_CHAPTER){
       chapter += 1;
       round = 1;
@@ -928,6 +1329,8 @@
         return;
       }
       bestChapter = Math.max(bestChapter, chapter);
+      progress.best = Math.max(progress.best, bestChapter);
+      saveProgress();
       setScene(chapter);
       const name = SCENES[(chapter - 1) % SCENES.length].short;
       setTimeout(() => showToast('Chapter ' + chapter + ' · ' + name, 'chapter'), 760);
@@ -959,6 +1362,8 @@
     stopTimerLoop();
     chapter = CHAPTER_COUNT;
     bestChapter = CHAPTER_COUNT;
+    progress.best = CHAPTER_COUNT;
+    saveProgress();
     updateHud();
     sfxRound();
     vibrate([10, 40, 10, 40, 20]);
@@ -979,7 +1384,8 @@
   function resetGame(keepBest){
     chapter = START_CHAPTER;
     round = 1;
-    if (!keepBest) bestChapter = START_CHAPTER;
+    if (!keepBest) bestChapter = Math.max(START_CHAPTER, progress.best);
+    applySkin();
     setScene(chapter, currentScene === 0);
     const cfg = roundConfig(chapter, round);
     timeLimit = cfg.timeLimit;
@@ -993,18 +1399,200 @@
     clearNumbers();
     middleTaps = 0;
     requiredDaTaps = 2;
-    state = State.WAITING;
-    spawnNumbers();          // numbers are visible right away — don't touch them yet
+    state = State.SEQUENCE;  // first move of every round: tap number 1 (no da-da needed)
+    spawnNumbers();
     resetTimer();
     renderTimer();
-    setPrompt('Tap da twice to start — don\'t touch the numbers yet');
+    setPrompt('Tap 1 to start');
   }
 
   window.addEventListener('resize', () => {
     if (state === State.WAITING || state === State.SEQUENCE) spawnNumbers();
   });
 
-  resetGame(false);
+  // ---------- progress (saved on the device) ----------
+  const STORE_KEY = '2dada.progress.v1';
+  function loadProgress(){
+    const base = { cleared: 0, rounds: 0, best: 1, theme: 'falls', skin: 'classic', unlocked: [], seen: [] };
+    try {
+      const raw = localStorage.getItem(STORE_KEY);
+      if (raw) return Object.assign(base, JSON.parse(raw));
+    } catch (e) {}
+    return base;
+  }
+  function saveProgress(){
+    try { localStorage.setItem(STORE_KEY, JSON.stringify(progress)); } catch (e) {}
+  }
+  const progress = loadProgress();
+
+  // ---------- rewards ----------
+  // scene = index into SCENES. req = unlock rule, checked against saved progress.
+  const THEMES = [
+    { id: 'falls',   name: 'Victoria Falls',  scene: 1, req: null,                    reqText: 'Yours from the start' },
+    { id: 'flag',    name: 'The flag',        scene: 0, req: p => p.cleared >= 1,     reqText: 'Clear chapter 1' },
+    { id: 'zambezi', name: 'Zambezi sunset',  scene: 2, req: p => p.cleared >= 3,     reqText: 'Clear chapter 3' },
+    { id: 'luangwa', name: 'South Luangwa',   scene: 3, req: p => p.cleared >= 4,     reqText: 'Clear chapter 4' },
+    { id: 'eagle',   name: 'Fish eagle',      scene: 4, req: p => p.cleared >= 5,     reqText: 'Clear all 5 chapters' },
+  ];
+  const SKINS = [
+    { id: 'classic',   name: 'Classic',      req: null,                  reqText: 'Yours from the start' },
+    { id: 'copper',    name: 'Copper',       req: p => p.cleared >= 2,   reqText: 'Clear chapter 2' },
+    { id: 'malachite', name: 'Malachite',    req: p => p.rounds >= 15,   reqText: 'Clear 15 rounds', count: p => p.rounds, goal: 15 },
+    { id: 'chitenge',  name: 'Chitenge',     req: p => p.cleared >= 4,   reqText: 'Clear chapter 4' },
+    { id: 'flag',      name: 'Flag colours', req: p => p.cleared >= 5,   reqText: 'Clear all 5 chapters' },
+  ];
+  const ALL_REWARDS = [
+    ...THEMES.map(t => Object.assign({ kind: 'theme', key: 'theme:' + t.id, label: 'New theme' }, t)),
+    ...SKINS.map(s => Object.assign({ kind: 'skin', key: 'skin:' + s.id, label: 'New number design' }, s)),
+  ];
+  const isUnlocked = r => !r.req || r.req(progress);
+
+  function checkUnlocks(announce){
+    let changed = false;
+    ALL_REWARDS.forEach(r => {
+      if (!isUnlocked(r) || progress.unlocked.includes(r.key)) return;
+      progress.unlocked.push(r.key);
+      if (!r.req) progress.seen.push(r.key);            // starter items are never "new"
+      else if (announce) queueBanner(r.label + ': ' + r.name);
+      changed = true;
+    });
+    if (changed) saveProgress();
+    updateRewardsBadge();
+  }
+
+  function updateRewardsBadge(){
+    const unseen = progress.unlocked.filter(k => !progress.seen.includes(k)).length;
+    const badge = document.getElementById('rewardsBadge');
+    badge.textContent = unseen;
+    badge.hidden = unseen === 0;
+  }
+
+  function applySkin(){
+    SKINS.forEach(s => el.playfield.classList.remove('skin-' + s.id));
+    el.playfield.classList.add('skin-' + progress.skin);
+  }
+
+  // pop-ups during play: "Reward unlocked — New theme: Zambezi sunset"
+  const bannerQueue = [];
+  let bannerBusy = false;
+  const bannerEl = document.getElementById('rewardBanner');
+  function queueBanner(text){
+    bannerQueue.push(text);
+    if (!bannerBusy) nextBanner();
+  }
+  function nextBanner(){
+    const text = bannerQueue.shift();
+    if (!text){ bannerBusy = false; return; }
+    bannerBusy = true;
+    document.getElementById('rewardBannerText').textContent = text;
+    bannerEl.classList.add('show');
+    setTimeout(() => bannerEl.classList.remove('show'), 2300);
+    setTimeout(nextBanner, 2750);
+  }
+
+  // ---------- rewards screen ----------
+  const LOCK_SVG = '<svg class="lock" viewBox="0 0 24 24" aria-hidden="true"><path d="M7 10V7a5 5 0 0 1 10 0v3" fill="none" stroke="currentColor" stroke-width="2.2"/><rect x="5" y="10" width="14" height="11" rx="2.5" fill="currentColor"/></svg>';
+  const rewardsEl = document.getElementById('rewards');
+
+  function statusText(r, unlocked, equipped){
+    if (equipped) return 'Equipped';
+    if (unlocked) return 'Tap to use';
+    return r.reqText + (r.count ? ' (' + Math.min(r.count(progress), r.goal) + '/' + r.goal + ')' : '');
+  }
+  function cardHtml(r, kind, equipped, visual){
+    const unlocked = isUnlocked(r);
+    const isNew = unlocked && !progress.seen.includes(kind + ':' + r.id);
+    return `<button class="reward-card ${unlocked ? '' : 'locked'} ${equipped ? 'equipped' : ''}" data-kind="${kind}" data-id="${r.id}" ${unlocked ? '' : 'aria-disabled="true"'}>
+      ${visual(unlocked)}
+      <div class="rc-name">${r.name}</div>
+      <div class="rc-status">${statusText(r, unlocked, equipped)}</div>
+      ${isNew ? '<span class="new-badge">NEW</span>' : ''}
+    </button>`;
+  }
+  function renderRewards(){
+    const got = ALL_REWARDS.filter(isUnlocked).length;
+    document.getElementById('rewardsCount').textContent = got + ' / ' + ALL_REWARDS.length;
+    document.getElementById('themeGrid').innerHTML = THEMES.map(t =>
+      cardHtml(t, 'theme', progress.theme === t.id, unlocked =>
+        `<div class="thumb">${SCENES[t.scene].draw()}${unlocked ? '' : LOCK_SVG}</div>`)
+    ).join('');
+    document.getElementById('skinGrid').innerHTML = SKINS.map(s =>
+      cardHtml(s, 'skin', progress.skin === s.id, unlocked =>
+        `<div class="skin-stage skin-${s.id}"><span class="num-btn preview">7</span>${unlocked ? '' : LOCK_SVG}</div>`)
+    ).join('');
+  }
+  function openRewards(){
+    renderRewards();                                     // draw first so NEW badges show
+    progress.unlocked.forEach(k => { if (!progress.seen.includes(k)) progress.seen.push(k); });
+    saveProgress();
+    updateRewardsBadge();
+    rewardsEl.classList.add('open');
+    rewardsEl.setAttribute('aria-hidden', 'false');
+  }
+  function closeRewards(){
+    rewardsEl.classList.remove('open');
+    rewardsEl.setAttribute('aria-hidden', 'true');
+  }
+  rewardsEl.addEventListener('click', (e) => {
+    const card = e.target.closest('.reward-card');
+    if (!card || card.classList.contains('locked')) return;
+    if (card.dataset.kind === 'theme'){ progress.theme = card.dataset.id; renderWelcomeScene(); }
+    else { progress.skin = card.dataset.id; applySkin(); }
+    saveProgress();
+    vibrate(10);
+    renderRewards();
+  });
+  document.getElementById('rewardsBack').addEventListener('click', closeRewards);
+  document.getElementById('rewardsBtn').addEventListener('click', () => { ensureAudio(); openRewards(); });
+
+  // ---------- welcome page ----------
+  // The game (and its timer) only starts once Start is tapped.
+  const welcome = document.getElementById('welcome');
+  const welcomeScene = document.getElementById('welcomeScene');
+  function renderWelcomeScene(){
+    const t = THEMES.find(x => x.id === progress.theme && isUnlocked(x)) || THEMES[0];
+    if (t.id === 'falls'){
+      welcomeScene.innerHTML = sceneVictoriaFalls(true);   // fully animated
+      welcomeScene.classList.remove('drift');
+    } else {
+      welcomeScene.innerHTML = SCENES[t.scene].draw();
+      welcomeScene.classList.add('drift');                 // slow moving camera
+    }
+    document.getElementById('welcomeCaption').textContent = SCENES[t.scene].caption;
+  }
+
+  let starting = false;
+  document.getElementById('startBtn').addEventListener('click', () => {
+    if (starting) return;
+    starting = true;
+    ensureAudio();          // a tap is needed before sounds can play
+    sfxRound();
+    vibrate(15);
+    welcome.classList.add('leaving');
+    setTimeout(() => {
+      welcome.classList.add('gone');
+      resetGame(false);     // start only once the welcome page has faded, so no time is lost
+    }, 450);
+  });
+
+  function goHome(){
+    stopTimerLoop();
+    state = State.IDLE;
+    clearNumbers();
+    el.failOverlay.classList.remove('show');
+    el.winOverlay.classList.remove('show');
+    renderWelcomeScene();
+    welcome.classList.remove('gone');
+    void welcome.offsetWidth;          // let the fade-in play
+    welcome.classList.remove('leaving');
+    starting = false;
+    updateRewardsBadge();
+  }
+  document.querySelectorAll('[data-home]').forEach(b => b.addEventListener('click', goHome));
+
+  checkUnlocks(false);
+  renderWelcomeScene();
+  applySkin();
 })();
 </script>
 
